@@ -59,6 +59,8 @@
         android:text="Sign up now"
         android:layout_below="@+id/login_btn"
         android:layout_centerHorizontal="true"
+        android:clickable="true"
+        android:onClick="onLinkClick"
         android:layout_marginTop="34dp" />
 
     <TextView
@@ -68,8 +70,5 @@
         android:textColor="#fc2803"
         android:layout_below="@+id/sign_up_link"
         android:layout_centerHorizontal="true"
-        android:onClick="onLinkClick"
-        android:clickable="true"
-        android:focusable="true"
         android:layout_marginTop="34dp" />
 </RelativeLayout>
