@@ -3,7 +3,7 @@ package com.isep.todolist.models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class User {
+public class Authenticate {
     @SerializedName("auth_token")
     @Expose
     private String authToken;
@@ -15,5 +15,4 @@ public class User {
     public void setAuthToken(String authToken) {
         this.authToken = authToken;
     }
-
 }

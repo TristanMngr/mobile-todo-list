@@ -11,23 +11,16 @@ import android.view.MenuItem;
 import android.widget.EditText;
 
 import com.isep.todolist.R;
-import com.isep.todolist.interfaces.UserService;
-import com.isep.todolist.models.User;
-import com.isep.todolist.remote.ServiceGenerator;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class TodoActivity extends AppCompatActivity {
-    private static final String TAG = "LoginActivity";
+    private static final String TAG = "AuthenticateActivity";
 
-    UserService userService = ServiceGenerator.createService(UserService.class);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_todo);
+
     }
 
     @Override
@@ -42,27 +35,13 @@ public class TodoActivity extends AppCompatActivity {
             case R.id.action_add_task:
                 Log.d(TAG, "open alert");
                 Log.d(TAG, "wow");
-                login("tristanmenager@gmail.com", "tristan");
+
 
                 return true;
                 default:
                     Log.d(TAG, "nothing happen");
             return super.onOptionsItemSelected(menuItem);
         }
-    }
-
-    public void login(String email, String password) {
-        userService.login(email, password).enqueue(new Callback<User>() {
-            @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                Log.d(TAG, response.body().getAuthToken());
-            }
-
-            @Override
-            public void onFailure(Call<User> call, Throwable t) {
-                Log.d(TAG, t.getMessage() + t.getCause());
-            }
-        });
     }
 
     private void alertCreationTodo() {
