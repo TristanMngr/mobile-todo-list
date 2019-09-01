@@ -4,13 +4,17 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 
 import com.isep.todolist.R;
+import com.isep.todolist.Utils.Helper;
 
 public class TodoActivity extends AppCompatActivity {
     private static final String TAG = "AuthenticateActivity";
@@ -29,14 +33,30 @@ public class TodoActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+
+    public void onClickAddTodo(View view) {
+        alertCreationTodo();
+    }
+
+    public void onClickSignOut(View view) {
+        Helper.removeToken(this);
+
+        Intent myIntent = new Intent(getBaseContext(), AuthenticateActivity.class);
+        startActivity(myIntent);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         switch(menuItem.getItemId()) {
-            case R.id.action_add_task:
-                Log.d(TAG, "open alert");
-                Log.d(TAG, "wow");
+            case R.id.add_todo:
+                alertCreationTodo();
+                return true;
+            case R.id.sign_out:
+                Log.d("singout", ">>>>>>");
+                Helper.removeToken(this);
 
-
+                Intent myIntent = new Intent(getBaseContext(), AuthenticateActivity.class);
+                startActivity(myIntent);
                 return true;
                 default:
                     Log.d(TAG, "nothing happen");
@@ -60,5 +80,9 @@ public class TodoActivity extends AppCompatActivity {
         .setNegativeButton("Cancel", null)
         .create();
         dialog.show();
+    }
+
+    public void createTodo() {
+
     }
 }
