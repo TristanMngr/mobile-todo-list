@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.ItemActivity">
+
+    <ListView
+      android:id="@+id/list_items"
+      android:layout_width="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="18dp"
+        android:layout_marginRight="18dp"
+      android:layout_height="wrap_content"/>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/sign_up_link"
+        android:text="Back to Todos"
+        android:textSize="20dp"
+        android:layout_below="@+id/list_items"
+        android:layout_centerHorizontal="true"
+        android:clickable="true"
+        android:onClick="onLinkTaskClick"
+        android:layout_marginTop="34dp" />
+
+</RelativeLayout>

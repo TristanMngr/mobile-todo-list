@@ -17,8 +17,11 @@ import android.widget.TextView;
 
 import com.isep.todolist.R;
 import com.isep.todolist.Utils.Helper;
+import com.isep.todolist.adapters.ItemAdapter;
 import com.isep.todolist.adapters.TodoAdapter;
+import com.isep.todolist.interfaces.ItemService;
 import com.isep.todolist.interfaces.TodoService;
+import com.isep.todolist.models.Item;
 import com.isep.todolist.models.Todo;
 import com.isep.todolist.remote.ServiceGenerator;
 
@@ -32,20 +35,27 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class TodoActivity extends AppCompatActivity {
-    private static final String TAG = "AuthenticateActivity";
+public class ItemActivity extends AppCompatActivity {
+    private static final String TAG = "ItemActivity";
 
-    private ListView todoListView;
-    private ArrayAdapter<Todo> arrayAdapter;
+    private ListView itemListView;
+    private ArrayAdapter<Item> arrayAdapter;
+    private String todoId;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_todo);
-        todoListView = findViewById(R.id.list_todo);
 
-        loadTodos();
+        Intent intent = getIntent();
+        todoId = intent.getStringExtra("todoId");
+
+        Log.d(TAG, "super id >>> " + todoId);
+
+        setContentView(R.layout.activity_item);
+        itemListView = findViewById(R.id.list_items);
+
+        loadItems();
     }
 
     @Override
@@ -58,7 +68,7 @@ public class TodoActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         switch(menuItem.getItemId()) {
             case R.id.add_todo:
-                alertCreationTodo();
+                alertCreationItem();
                 return true;
             case R.id.sign_out:
                 Helper.removeToken(this);
@@ -72,17 +82,17 @@ public class TodoActivity extends AppCompatActivity {
         }
     }
 
-    private void alertCreationTodo() {
-        final EditText todoEditText = new EditText(this);
+    private void alertCreationItem() {
+        final EditText itemEditText = new EditText(this);
         AlertDialog dialog = new AlertDialog.Builder(this)
-        .setTitle("Add a new todo")
+        .setTitle("Add a new item")
         .setMessage("What do you want to do next?")
-        .setView(todoEditText)
+        .setView(itemEditText)
         .setPositiveButton("Add", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                String todoTitle = String.valueOf(todoEditText.getText());
-                createTodo(todoTitle);
+                String itemName = String.valueOf(itemEditText.getText());
+                createItem(itemName);
             }
         })
         .setNegativeButton("Cancel", null)
@@ -90,63 +100,55 @@ public class TodoActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    public void loadTodos() {
-        TodoService todoService = ServiceGenerator.createService(TodoService.class, Helper.getToken(this));
+    public void loadItems() {
+        ItemService itemService = ServiceGenerator.createService(ItemService.class, Helper.getToken(this));
 
-        todoService.loadTodos().enqueue(new Callback<List<Todo>>() {
+        itemService.loadItems(todoId).enqueue(new Callback<List<Item>>() {
             @Override
-            public void onResponse(Call<List<Todo>> call, Response<List<Todo>> response) {
+            public void onResponse(Call<List<Item>> call, Response<List<Item>> response) {
                 if (response.isSuccessful()) {
-                    ArrayList<Todo> todoList = new ArrayList<>();
-                    for (Todo todo : response.body()) {
-                        todoList.add(todo);
+                    ArrayList<Item> itemList= new ArrayList<>();
+                    for (Item item : response.body()) {
+                        itemList.add(item);
                     }
 
                     if (arrayAdapter == null) {
-                        arrayAdapter = new TodoAdapter(getBaseContext(), todoList);
-                        todoListView.setAdapter(arrayAdapter);
+                        arrayAdapter = new ItemAdapter(getBaseContext(), itemList);
+                        itemListView.setAdapter(arrayAdapter);
                     } else {
                         arrayAdapter.clear();
-                        arrayAdapter.addAll(todoList);
+                        arrayAdapter.addAll(itemList);
                         arrayAdapter.notifyDataSetChanged();
                     }
                 } else {
-                    Log.d(TAG, "Unable to fetch todos");
+                    Log.d(TAG, "Unable to fetch items");
                 }
             }
 
             @Override
-            public void onFailure(Call<List<Todo>> call, Throwable t) {
+            public void onFailure(Call<List<Item>> call, Throwable t) {
                 Log.d(TAG, t.getMessage() + t.getCause());
             }
         });
     }
 
-    public void onLinkTaskClick(View view) {
-        View parent = (View) view.getParent();
-        TextView todoTextView = parent.findViewById(R.id.todo_title);
-        Intent myIntent = new Intent(getBaseContext(), ItemActivity.class);
-        String todoId = String.valueOf(todoTextView.getTag());
-        myIntent.putExtra("todoId", todoId);
-        startActivity(myIntent);
-    }
+    public void createItem(String name) {
 
-    public void createTodo(String title) {
-        TodoService todoService = ServiceGenerator.createService(TodoService.class, Helper.getToken(this));
+        ItemService itemService = ServiceGenerator.createService(ItemService.class, Helper.getToken(this));
 
-        todoService.create(title).enqueue(new Callback<Todo>() {
+        itemService.create(todoId, name).enqueue(new Callback<Item>() {
             @Override
-            public void onResponse(Call<Todo> call, Response<Todo> response) {
+            public void onResponse(Call<Item> call, Response<Item> response) {
                 if (response.isSuccessful()) {
-                    Todo todo = response.body();
-                    loadTodos();
+                    Item item = response.body();
+                    loadItems();
                 } else {
-                    Log.d(TAG, "Unable to create the todo");
+                    Log.d(TAG, "Unable to create the item");
                 }
             }
 
             @Override
-            public void onFailure(Call<Todo> call, Throwable t) {
+            public void onFailure(Call<Item> call, Throwable t) {
                 Log.d(TAG, t.getMessage() + t.getCause());
             }
         });
@@ -154,23 +156,23 @@ public class TodoActivity extends AppCompatActivity {
 
     public void onClickDoneButton(View view) {
         View parent = (View) view.getParent();
-        TextView todoTextView = parent.findViewById(R.id.todo_title);
-        String todoId = String.valueOf(todoTextView.getTag());
+        TextView itemTextView = parent.findViewById(R.id.item_title);
+        String itemId = String.valueOf(itemTextView.getTag());
+        Log.d(TAG, ">>>>> " + itemId);
+        deleteItem(itemId);
 
-        deleteTodo(todoId);
-
-        loadTodos();
+        loadItems();
     }
 
 
-    public void deleteTodo(String id) {
-        TodoService todoService = ServiceGenerator.createService(TodoService.class, Helper.getToken(this));
+    public void deleteItem(String id) {
+        ItemService itemService = ServiceGenerator.createService(ItemService.class, Helper.getToken(this));
 
-        todoService.deleteTodo(id).enqueue(new Callback<ResponseBody>() {
+        itemService.deleteItem(todoId, id).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call <ResponseBody>call, Response <ResponseBody>response) {
                 if (!response.isSuccessful()) {
-                    Log.d(TAG, "Unable to delete Todo");
+                    Log.d(TAG, "Unable to delete Item");
                 }
             }
 
@@ -181,5 +183,8 @@ public class TodoActivity extends AppCompatActivity {
         });
     }
 
-
+    public void onLinkTaskClick(View view) {
+        Intent myIntent = new Intent(getBaseContext(), TodoActivity.class);
+        startActivity(myIntent);
+    }
 }
